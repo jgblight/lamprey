@@ -10,75 +10,66 @@ damp0 = -0.1
 damp = -1
 freq = 30
 
-#silly hack
-def pinv(matrix):
-	mat_string = ';'.join([ ','.join([str(y) for y in x]) for x in matrix])
-	subprocess.call(["python","/Users/jgblight/Documents/Neuro/lamprey/pinv.py",mat_string])
-	output = open("/Users/jgblight/Documents/Neuro/lamprey/output").read().strip()
-	output = [[ float(x) for x in y.split(',')] for y in output.split(';') ]
-	if len(output) == 1:
-		output = output[0]
-	return output
-
-
 net = nef.Network('Neural Lamprey')
 
-def phi(z,m):
-	return exp(-1*(z-0.1*m)**2/0.7**2)
+output = open('/Users/jgblight/Documents/Neuro/lamprey/data.pkl', 'r')
+m_d = pickle.load(output)
+m_i = pickle.load(output)
+start = pickle.load(output)
+output.close()
 
-def Phi(z):
-	return [1,sin(2*pi*z),cos(2*pi*z),sin(4*pi*z)]
+#for i in range(10):
+#	encoders = []
+#	for j in range(200):
+#		encoders.append([random.choice([-1,1])])
+#	net.make('a'+str(i), neurons=200, dimensions=1,encoders=encoders)
 
-def get_coeffiecient(n,m):
-	dx = 1/100000.
-	return sum([Phi(z*dx)[n]*phi(z*dx,m)*dx for z in range(0,100001)])
+#for i in range(10):
+#	for j in range(10):
+#		if i == j:
+#			net.connect('a'+str(i),'a'+str(j),func=lambda x: x[0]*(m_d[j][i])*tau + x[0])
+#		else:
+#			net.connect('a'+str(i),'a'+str(j),func=lambda x: x[0]*(m_d[j][i])*tau)
+#net.make_input('input', [0])
+#net.connect('input','a0')
 
-def matmul(x,y):
-	m = []
-	for i in range(len(x)):
-		row = []
-		for j in range(len(y[0])):
-			element = sum([x[i][k]*y[k][j] for k in range(len(x[i])) ])
-			row.append(element)
-		m.append(row)
-	return m
-
-
-Gamma = [[get_coeffiecient(n,m) for m in range(10)] for n in range(4)]
-print Gamma
-Gamma_inv = pinv(Gamma)
-print Gamma_inv
-
-M_d = [[damp0,freq,damp0,0],[-0.5*freq,0,0.5*freq,0],[damp0,-1*freq,damp0,0],[0,0,0,damp]]
-M_i = [[0.5,0,-0.5,0],[0,1,0,0],[-0.5,0,0.5,0],[0,0,0,0]]
-
-#m_d = sum([Gamma[j][0]*sum([Gamma_inv[i][0]*M_d[i][j] for i in range(4)]) for j in range(4)])
-#m_i = sum([Gamma[j][0]*sum([Gamma_inv[i][0]*M_i[i][j] for i in range(4)]) for j in range(4)])
-
-m_d = matmul(matmul(Gamma_inv,M_d),Gamma)
-m_i = matmul(matmul(Gamma_inv,M_i),Gamma)
-
-m = []
-for i in range(10):
-	row = []
+encoders = []
+for i in range(200):
+	e = [] 
 	for j in range(10):
-		row.append(m_d[i][j] + m_i[i][j])
-	m.append(row)
+		e.append(random.choice([-1,1]))
+	encoders.append(e)
 
-for i in range(10):
-	encoders = []
-	for j in range(200):
-		encoders.append([random.choice([-1,1])])
-	net.make('a'+str(i), neurons=200, dimensions=1,encoders=encoders)
+def m_d_(x):
+	dx = []
+	for i in range(10):
+		dx0 = 0
+		for j in range(10):
+			dx0 += m_d[i][j]*x[j]
+		dx.append(dx0*tau + x[i])
+	return dx
 
-for i in range(10):
-	for j in range(10):
-		if i == j:
-			net.connect('a'+str(i),'a'+str(j),func=lambda x: x[0]*(m_d[j][i] + m_i[j][i])*tau + x[0])
-		else:
-			net.connect('a'+str(i),'a'+str(j),func=lambda x: x[0]*(m_d[j][i] + m_i[j][i])*tau)
+def m_i_(x):
+	if x[0] > 0.8:
+		o = []
+		for i in range(10):
+			dx0 = 0
+			for j in range(10):
+				dx0 += m_i[i][j]*start[j]
+			o.append(dx0*tau)
+
+	else:
+		o = [0,0,0,0,0,0,0,0,0,0]
+	return o
+
+net.make('a', neurons=400, dimensions=10,encoders=encoders)
+net.connect('a','a',func=m_d_)
 
 net.make_input('input', [0])
-net.connect('input','a0')
+net.make('switch',1,1,mode='direct')
+net.connect('input','switch')
+net.connect('switch','a',func=m_i_)
+
+
 net.add_to_nengo()
 

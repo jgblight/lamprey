@@ -33,10 +33,10 @@ net.connect('A','M_a',transform=[[0,0,0,0],[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,
 
 def swimming(x):
     dx1 = x[0]*x[2]
-    dx2 = -0.5*x[0]*x[1] + x[0]*x[3]
+    dx2 = -0.5*x[0]*x[1] + 0.5*x[0]*x[3]
     dx3 = -1*x[0]*x[2]
     dx4 = 0
-    return dx1 * tau + x[1], dx2 * tau + x[2], dx3 * tau + x[3], dx4 * tau + x[4]
+    return dx1 * tau, dx2 * tau, dx3 * tau, dx4 * tau
 net.connect('M_a', 'A', func=swimming)
 
 
