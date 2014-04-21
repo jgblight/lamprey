@@ -7,7 +7,7 @@ damp = -1
 freq = 30
 
 def phi(z,m):
-	return exp(-1*(z-0.1*m)**2/0.07**2)
+	return exp(-1*(z-0.1*m)**2/0.13**2)
 
 def Phi(z):
 	return [1,sin(2*pi*z),cos(2*pi*z),sin(4*pi*z)]
@@ -20,6 +20,7 @@ Gamma = np.zeros([4,10])
 for m in range(10):
 	for n in range(4):
 		Gamma[n,m] = get_coefficient(n,m)
+		#Gamma[n,m] = Phi(0.5)[n]*phi(0.5,m)
 
 Gamma_inv = np.linalg.pinv(Gamma)
 
@@ -40,6 +41,7 @@ A = np.array([A0,A1,A2,A3])
 
 a = np.dot(Gamma_inv,A)
 print m_d
+
 
 output = open('data.pkl', 'w')
 pickle.dump(m_d.tolist(),output)

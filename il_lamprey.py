@@ -33,8 +33,11 @@ output.close()
 #net.make_input('input', [0])
 #net.connect('input','a0')
 
+def phi(z,m):
+	return exp(-1*(z-0.1*m)**2/0.13**2)
+
 encoders = []
-for i in range(200):
+for i in range(400):
 	e = [] 
 	for j in range(10):
 		e.append(random.choice([-1,1]))
@@ -69,6 +72,15 @@ net.make_input('input', [0])
 net.make('switch',1,1,mode='direct')
 net.connect('input','switch')
 net.connect('switch','a',func=m_i_)
+
+def T(x):
+	y = 0
+	for m in range(10):
+		y += x[0]*phi(0.5,m)
+	return y
+
+net.make('T1',1,1,mode='direct')
+net.connect('a','T1',func=T)
 
 
 net.add_to_nengo()
