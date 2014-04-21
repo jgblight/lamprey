@@ -7,7 +7,7 @@ import subprocess
 import pickle
 import time
 
-tau = 0.1
+tau = 0.02
 damp0 = -0.1
 damp = -1
 freq = 30
@@ -74,7 +74,7 @@ def m_i_(x):
 	return o
 
 net.make('a', neurons=400, dimensions=10,radius=20,encoders=encoders)
-net.connect('a','a',func=m_d_,weight_func=print_weights)
+net.connect('a','a',func=m_d_,weight_func=print_weights,pstc=tau)
 
 #net.make_input('input', [1])
 #net.make('switch',1,11,mode='direct')
@@ -90,7 +90,7 @@ net.connect('a','a',func=m_d_,weight_func=print_weights)
 def T(x,z):
 	y = 0
 	for m in range(10):
-		y += x[0]*phi(z,m)
+		y += x[m]*phi(z,m)
 	return y
 
 net.make('T1',1,1,mode='direct')
