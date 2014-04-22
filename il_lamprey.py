@@ -6,6 +6,8 @@ from math import sin,cos,pi,exp
 import subprocess
 import pickle
 import time
+import nef.templates.gate as gating
+import nef.templates.learned_termination as learning
 
 tau = 0.02
 damp0 = -0.1
@@ -19,7 +21,8 @@ time.sleep(100)
 output = open('/Users/jgblight/Documents/Neuro/lamprey/data.pkl', 'r')
 m_d = pickle.load(output)
 m_i = pickle.load(output)
-start = pickle.load(output)
+gamma = pickle.load(output)
+gamma_inv = pickle.load(output)
 output.close()
 
 #for i in range(10):
@@ -61,31 +64,27 @@ def m_d_(x):
 	return dx
 
 def m_i_(x):
-	if x[0] > 0.8:
-		o = []
-		for i in range(1,11):
-			dx0 = 0
-			for j in range(1,11):
-				dx0 += m_i[i-1][j-1]*x[j]
-			o.append(dx0*tau)
-
-	else:
-		o = [0,0,0,0,0,0,0,0,0,0]
+	o = []
+	for i in range(10):
+		dx0 = 0
+		for j in range(10):
+			dx0 += m_i[i][j]*x[j]
+		o.append(dx0*tau)
 	return o
 
 net.make('a', neurons=400, dimensions=10,radius=20,encoders=encoders)
 net.connect('a','a',func=m_d_,weight_func=print_weights,pstc=tau)
 
 #net.make_input('input', [1])
-#net.make('switch',1,11,mode='direct')
-#net.connect('input','switch',transform=[[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0]])
-#e = zeros((11,10))
-#for i in range(1,11):#
-#	e[i][i-1] = 1
-#e = e.tolist()
-#print e
-#net.connect('a','switch',transform=e)
+#net.make('switch',1,10,mode='direct')
+#net.connect('a','switch')
 #net.connect('switch','a',func=m_i_)
+
+#gating.make(net,name='Gate', gated='switch', neurons=40,
+#    pstc=0.01) #Make a gate population with 40 neurons, and a postsynaptic 
+               #time constant of 10ms
+#net.connect('input', 'Gate')
+
 
 def T(x,z):
 	y = 0

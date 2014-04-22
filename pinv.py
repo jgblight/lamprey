@@ -56,5 +56,6 @@ print a[:,0:100]
 output = open('data.pkl', 'w')
 pickle.dump(m_d.tolist(),output)
 pickle.dump(m_i.tolist(),output)
-pickle.dump(a[:,5].tolist(),output)
+pickle.dump(Gamma.tolist(),output)
+pickle.dump(Gamma_inv.tolist(),output)
 output.close()
