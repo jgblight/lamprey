@@ -44,11 +44,15 @@ def phi(z,m):
 	return exp(-1*((z-(1/10.0)*m)**2)/0.25)
 
 encoders = []
-for i in range(400):
-	e = [] 
-	for j in range(10):
-		e.append(random.choice([-1,1]))
-	encoders.append(e)
+for i in range(10):
+	for j in range(20):
+		en = [0,0,0,0,0,0,0,0,0,0]
+		en[i] = 1
+		encoders.append(en)
+	for j in range(20):
+		en = [0,0,0,0,0,0,0,0,0,0]
+		en[i] = -1
+		encoders.append(en)
 
 def print_weights(w):
     print w

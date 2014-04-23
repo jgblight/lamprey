@@ -44,11 +44,15 @@ def phi(z,m):
 	return exp(-1*((z-(1/10.0)*m)**2)/0.25)
 
 encoders = []
-for i in range(400):
-	e = [] 
-	for j in range(10):
-		e.append(random.choice([-1,1]))
-	encoders.append(e)
+for i in range(10):
+	for j in range(20):
+		en = [0,0,0,0,0,0,0,0,0,0]
+		en[i] = 1
+		encoders.append(en)
+	for j in range(20):
+		en = [0,0,0,0,0,0,0,0,0,0]
+		en[i] = -1
+		encoders.append(en)
 
 def print_weights(w):
     print w
@@ -72,11 +76,11 @@ def m_i_(x):
 		o.append(dx0*tau)
 	return o
 
-net.make('a', neurons=400, dimensions=10,radius=20,encoders=encoders)
-net.make('a_', neurons=400, dimensions=10,radius=20,encoders=encoders)
+net.make('a', neurons=400, dimensions=10,radius=1,encoders=encoders)
+net.make('a_', neurons=400, dimensions=10,radius=1,encoders=encoders)
 
-net.connect('a','a_',pstc=tau)
-net.connect('a_','a',func=m_d_,pstc=tau)
+#net.connect('a','a_',pstc=tau)
+#net.connect('a_','a',func=m_d_,pstc=tau)
 
 M_d = [[damp0,freq,damp0],[-0.5*freq,0,0.5*freq],[damp0,-1*freq,damp0]]
 
@@ -134,8 +138,15 @@ def Gamma(x):
 
 net.connect('A','a_actual',func=Gamma,pstc=tau)
 
-#learning.make(net,errName='error', N_err=100, preName='pre', postName='post',
-#    rate=5e-4)
+#net.make('error',100,10,radius=20)
+learning.make(net,errName='error', N_err=100, preName='a', postName='a',rate=5e-4)
+net.connect('a_actual','error')
+net.connect('a', 'error', weight=-1)
+
+net.make_input('switch',[0])
+gating.make(net,name='Gate', gated='error', neurons=40,
+    pstc=0.01)
+net.connect('switch', 'Gate')
 
 #net.make_input('input', [1])
 #net.make('switch',1,10,mode='direct')
