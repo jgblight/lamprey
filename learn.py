@@ -9,7 +9,7 @@ import time
 import nef.templates.gate as gating
 import nef.templates.learned_termination as learning
 
-tau = 0.02
+tau = 0.005
 damp0 = -0.1
 damp = -1
 freq = 30
@@ -41,7 +41,7 @@ output.close()
 #net.connect('input','a0')
 
 def phi(z,m):
-	return exp(-1*((z-(1/10.0)*m)**2)/0.25)
+	return exp(-1*((z-(1/10.0)*m)**2)/0.01)
 
 encoders = []
 for i in range(10):
@@ -77,7 +77,7 @@ def m_i_(x):
 	return o
 
 net.make('a', neurons=400, dimensions=10,radius=1,encoders=encoders)
-net.make('a_', neurons=400, dimensions=10,radius=1,encoders=encoders)
+#net.make('a_', neurons=400, dimensions=10,radius=1,encoders=encoders)
 
 #net.connect('a','a_',pstc=tau)
 #net.connect('a_','a',func=m_d_,pstc=tau)
@@ -85,15 +85,15 @@ net.make('a_', neurons=400, dimensions=10,radius=1,encoders=encoders)
 M_d = [[damp0,freq,damp0],[-0.5*freq,0,0.5*freq],[damp0,-1*freq,damp0]]
 
 net.make_input('damping',[-0.1])
-net.make_input('swim',[30])
+net.make_input('swim',[60])
 
 net.make('A', neurons=200, dimensions=4)
 
 net.make('M_d',1,5,radius=5,mode='direct')
 net.make('M_a',1,5,radius=40,mode='direct')
 
-net.connect('damping','M_d',transform=[[1],[0],[0],[0],[0]])
-net.connect('A','M_d',transform=[[0,0,0,0],[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+net.connect('damping','M_d',transform=[[1],[0],[0],[0],[0]],pstc=tau)
+net.connect('A','M_d',transform=[[0,0,0,0],[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],pstc=tau)
 
 def damping(x):
     dx1 = x[0]*x[1] + x[0]*x[3]
@@ -101,10 +101,10 @@ def damping(x):
     dx3 = x[0]*x[1] + x[0]*x[3]
     dx4 = damp*x[4]
     return dx1 * tau + x[1], dx2 * tau + x[2], dx3 * tau + x[3], dx4 * tau + x[4]
-net.connect('M_d', 'A', func=damping)
+net.connect('M_d', 'A', func=damping, pstc=tau)
 
-net.connect('swim','M_a',transform=[[1],[0],[0],[0],[0]])
-net.connect('A','M_a',transform=[[0,0,0,0],[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+net.connect('swim','M_a',transform=[[1],[0],[0],[0],[0]],pstc=tau)
+net.connect('A','M_a',transform=[[0,0,0,0],[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],pstc=tau)
 
 def swimming(x):
     dx1 = x[0]*x[2]
@@ -112,8 +112,8 @@ def swimming(x):
     dx3 = -1*x[0]*x[2]
     dx4 = 0
     return dx1 * tau, dx2 * tau, dx3 * tau, dx4 * tau
-net.connect('M_a', 'A', func=swimming)
-net.make('a_actual',200,10)
+net.connect('M_a', 'A', func=swimming,pstc=tau)
+net.make('a_actual',200,10,mode='direct')
 
 #def M_d_(x):
 #	dx = []
@@ -138,41 +138,49 @@ def Gamma(x):
 
 net.connect('A','a_actual',func=Gamma,pstc=tau)
 
+net.make('dif',1,10,mode='direct')
+net.connect('a_actual','dif')
+net.connect('a','dif',weight=-1)
+
+net.connect('dif','a')
+
 #net.make('error',100,10,radius=20)
-learning.make(net,errName='error', N_err=100, preName='a', postName='a',rate=5e-4)
-net.connect('a_actual','error')
-net.connect('a', 'error', weight=-1)
+#learning.make(net,errName='error', N_err=100, preName='a', postName='a',rate=5e-4)
+#net.connect('a_actual','error',pstc=tau)
+#net.connect('a', 'error', pstc=tau, weight=-1)
 
-net.make_input('switch',[0])
-gating.make(net,name='Gate', gated='error', neurons=40,
-    pstc=0.01)
-net.connect('switch', 'Gate')
+#net.make_input('switch',[0])
+#gating.make(net,name='Gate', gated='error', neurons=40,
+#    pstc=0.005)
+#net.connect('switch', 'Gate')
 
-#net.make_input('input', [1])
-#net.make('switch',1,10,mode='direct')
-#net.connect('a','switch')
-#net.connect('switch','a',func=m_i_)
+def T(x):
+	t = []
+	for z in range(10):
+		y = 0
+		for m in range(10):
+			y += x[m]*phi(z*0.1,m)
+	t.append(y)
+	return t
 
-#gating.make(net,name='Gate', gated='switch', neurons=40,
-#    pstc=0.01) #Make a gate population with 40 neurons, and a postsynaptic 
-               #time constant of 10ms
-#net.connect('input', 'Gate')
+#def T1(x):
+#	return T(x,0.25)
+#def T2(x):
+#	return T(x,0.5)
+#def T3(x):
+#	return T(x,0.75)
 
+net.make('T',1,10,mode='direct')
+net.connect('a','T',func=T)
 
-def T(x,z):
-	y = 0
-	for m in range(10):
-		y += x[m]*phi(z,m)
-	return y
+#net.make('T1',1,1,mode='direct')
+#net.connect('a_actual','T1',func=T1)
 
-net.make('T1',1,1,mode='direct')
-net.connect('a','T1',func=lambda x: T(x,0.25))
+#net.make('T2',1,1,mode='direct')
+#net.connect('a_actual','T2',func=T2)
 
-net.make('T2',1,1,mode='direct')
-net.connect('a','T2',func=lambda x: T(x,0.5))
-
-net.make('T3',1,1,mode='direct')
-net.connect('a','T3',func=lambda x: T(x,0.75))
+#net.make('T3',1,1,mode='direct')
+#net.connect('a_actual','T3',func=T3)
 
 net.add_to_nengo()
 

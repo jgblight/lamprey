@@ -9,7 +9,7 @@ damp = -1
 freq = 30
 
 def phi(z,m):
-	return exp(-1*np.square(z-(1/10.0)*m)/np.square(0.5))
+	return exp(-1*np.square(z-(1/10.0)*m)/np.square(0.1))
 
 def Phi(z):
 	return [1,sin(2*pi*z),cos(2*pi*z),sin(4*pi*z)]
