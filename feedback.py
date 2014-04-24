@@ -145,21 +145,12 @@ def Gamma(x):
 net.connect('A','a_actual',func=Gamma,pstc=tau
 )
 
-#net.make('dif',1,10,mode='direct')
-#net.connect('a_actual','dif')
-#net.connect('a','dif',weight=-1)
+net.make('dif',1,10,mode='direct')
+net.connect('a_actual','dif')
+net.connect('a','dif',weight=-1)
 
-#net.connect('dif','a')
+net.connect('dif','a')
 
-#net.make('error',100,10,radius=20)
-learning.make(net,errName='error', N_err=100, preName='a', postName='a',rate=5e-4)
-net.connect('a_actual','error',pstc=tau)
-net.connect('a', 'error', pstc=tau, weight=-1)
-
-net.make_input('switch',[0])
-gating.make(net,name='Gate', gated='error', neurons=40,
-    pstc=0.005)
-net.connect('switch', 'Gate')
 
 def T(x):
     t = []
@@ -174,4 +165,3 @@ net.make('T',1,10,mode='direct')
 net.connect('a','T',func=T)
 
 net.add_to_nengo()
-
