@@ -12,7 +12,7 @@ import nef.templates.learned_termination as learning
 tau = 0.02
 damp0 = -0.1
 damp = -1
-freq = 30
+freq = 60
 
 net = nef.Network('Neural Lamprey')
 
@@ -24,21 +24,6 @@ m_i = pickle.load(output)
 gamma = pickle.load(output)
 gamma_inv = pickle.load(output)
 output.close()
-
-#for i in range(10):
-#	encoders = []
-#	for j in range(200):
-#		encoders.append([random.choice([-1,1])])
-#	net.make('a'+str(i), neurons=200, dimensions=1,encoders=encoders)
-
-#for i in range(10):
-#	for j in range(10):
-#		if i == j:
-#			net.connect('a'+str(i),'a'+str(j),func=lambda x: x[0]*(m_d[j][i])*tau + x[0])
-#		else:
-#			net.connect('a'+str(i),'a'+str(j),func=lambda x: x[0]*(m_d[j][i])*tau)
-#net.make_input('input', [0])
-#net.connect('input','a0')
 
 def phi(z,m):
 	return exp(-1*((z-(1/10.0)*m)**2)/0.25)
@@ -76,34 +61,20 @@ def m_i_(x):
 		o.append(dx0*tau)
 	return o
 
-net.make('a', neurons=400, dimensions=10,radius=20,encoders=encoders)
+net.make('a', neurons=400, dimensions=10,radius=3,encoders=encoders,noise=0.1)
 net.connect('a','a',func=m_d_,weight_func=print_weights,pstc=tau)
 
-#net.make_input('input', [1])
-#net.make('switch',1,10,mode='direct')
-#net.connect('a','switch')
-#net.connect('switch','a',func=m_i_)
+def T(x):
+    t = []
+    for z in range(10):
+        y = 0
+        for m in range(10):
+            y += x[m]*phi(z*0.1,m)
+        t.append(y)
+    return t
 
-#gating.make(net,name='Gate', gated='switch', neurons=40,
-#    pstc=0.01) #Make a gate population with 40 neurons, and a postsynaptic 
-               #time constant of 10ms
-#net.connect('input', 'Gate')
-
-
-def T(x,z):
-	y = 0
-	for m in range(10):
-		y += x[m]*phi(z,m)
-	return y
-
-net.make('T1',1,1,mode='direct')
-net.connect('a','T1',func=lambda x: T(x,0.25))
-
-net.make('T2',1,1,mode='direct')
-net.connect('a','T2',func=lambda x: T(x,0.5))
-
-net.make('T3',1,1,mode='direct')
-net.connect('a','T3',func=lambda x: T(x,0.75))
+net.make('T',1,10,mode='direct')
+net.connect('a','T',func=T)
 
 net.add_to_nengo()
 

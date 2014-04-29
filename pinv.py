@@ -9,7 +9,7 @@ damp = -1
 freq = 30
 
 def phi(z,m):
-	return exp(-1*np.square(z-(1/10.0)*m)/np.square(0.1))
+	return exp(-1*np.square(z-(1/10.0)*m)/np.square(0.5))
 
 def Phi(z):
 	return [1,sin(2*pi*z),cos(2*pi*z),sin(4*pi*z)]
@@ -43,14 +43,7 @@ A2 = [sin(30*t*0.001) for t in range(1000)]
 A = np.array([A0,A1,A2])
 
 a = np.dot(Gamma_inv,A)
-print Gamma
-print ' '
-print m_d
-print ' '
-print a[:,0:100]
-#start = a[:,5]
-#sim = zeros([10,1000])
-#for i in np.arange()
+
 
 
 output = open('data.pkl', 'w')

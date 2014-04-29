@@ -25,6 +25,8 @@ gamma = pickle.load(output)
 gamma_inv = pickle.load(output)
 output.close()
 
+def phi(z,m):
+    return exp(-1*((z-(1/10.0)*m)**2)/0.01)
 
 net.make_input('damping',[-0.1])
 net.make_input('swim',[60])
@@ -81,58 +83,34 @@ def T(x):
 net.make('T',1,10,mode='direct')
 net.connect('a_actual','T',func=T)
 
-def torque(x):
-    f = []
-    for i in range(9):
-        f.append(x[i]-x[i+1])
-    return f
+class Mechanical(nef.SimpleNode):
+    def init(self):
+        self.x=[0,0,0,0,0,0,0,0,0]
+        self.theta=[0,0,0,0,0,0,0,0,0]
+    def origin_x(self):
+        return self.x
+    def origin_theta(self):
+        return self.theta
+    def termination_T(self,T,dimensions=10,pstc=tau):
+        x = []
+        for i in range(9):
+            f = T[i]-T[i+1]
+            dx = f*sin(self.theta[i])*0.001
+            #x.append(self.x[i] + dx)
+            self.x[i] += dx
+        #mean = 0
+        #for i in range(9):
+        #    mean += x[i]
+        #mean /= 9.0
+        #for i in range(9):
+        #    self.x[i] = x[i] - mean
 
-net.make('F',1,9,mode='direct')
-net.connect('T','F',func=torque)
+        self.theta[0] = (sin((self.x[1]-self.x[0])/0.1) + (pi/2.))
+        for i in range(1,8):
+            self.theta[i] = sin((self.x[i+1]-self.x[i-1])/0.2) + (pi/2.)
+        self.theta[8] = sin((self.x[8]-self.x[7])/0.1) + (pi/2.)
 
-net.make('x',1,9,mode='direct')
-net.make('theta',1,9,mode='direct',radius=pi)
-net.make('F_theta',1,18,mode='direct')
-net.make('F_x',1,9,mode='direct')
-net.make('F_z',1,9,mode='direct')
-
-def get_theta(x):
-    theta = []
-    theta.append(sin((x[1]-x[0])/2.) + (pi/2.))
-    for i in range(1,8):
-        theta.append(sin((x[i+1]-x[i-1])/4.) + (pi/2.))
-    theta.append(sin((x[8]-x[7])/2.) + (pi/2.))
-    return theta
-net.connect('x','theta',func=get_theta)
-
-t = zeros((18,9)).tolist()
-for i in range(9):
-    t[i][i] = 1
-net.connect('theta','F_theta',transform=t)
-
-t = zeros((18,9)).tolist()
-for i in range(9):
-    t[i+9][i] = 1
-net.connect('F','F_theta',transform=t)
-
-def Fx(x):
-    fx = []
-    for i in range(9):
-        fx.append(sin(x[i])*x[i+9])
-    return fx
-net.connect('F_theta','F_x',func=Fx)
-
-def Fz(x):
-    fz = []
-    for i in range(9):
-        fz.append(cos(x[i])*x[i+9])
-    return fz
-net.connect('F_theta','F_z',func=Fz)
-
-t = zeros((9,9)).tolist()
-for i in range(9):
-    t[i][i] = tau*6
-net.connect('x','x',pstc=tau)
-net.connect('F','x',transform=t,pstc=tau)
+x__=net.add(Mechanical('x__'))
+net.connect('T',x__.getTermination('T'))
 
 net.add_to_nengo()
