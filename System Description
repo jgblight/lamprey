@@ -1,0 +1,32 @@
+System Description
+
+The lamprey locomotion model developed by Eliasmith and Anderson demonstrates the use of the Neural Engineering Framework (NEF) in modelling complex behaviour. This model is related to the idea of a central pattern generator, a group of neurons that produces patterns of activity without sensory input. The model works by solving for optimal high-level control signals based on orthogonal basis functions and then projects them onto localized groups of neurons. The resulting 'muscles' can be shown to exhibit realistic oscillatory behaviour.   
+
+While the original model is designed to operate without input, we would like to consider a situation in which motor behaviour is controlled based on some error signal. This could serve as a model for more conciously controlled behaviour and potentially be applied to designing neural control systems. Ideally, it should also rid us of the need to pre-determine the local activities, allowing us to implement specific behaviour with less analysis.
+
+There is some question as to what constitutes a realistic and effective control signal. As with the original model, we might consider either high-level or low-level behaviour. At a high level, we might be interested in matching a target speed while also maximizing efficiency. At a lower level, we might be interested in matching a known position function. The former, high-level goals are more difficult to relate to individual muscle control but could conceivably play a role in motor learning. The latter assumes a much more specific target and modulates the control signal to meet it, perhaps more similar to the role of the cerebellum, modulating voluntary movement based on proprioception, and certainly similar to modern control systems. 
+
+This report focuses on this lower level control implementation. The goal is to set up a recurrent relation in which the muscle activity is determined based on a 'proprioception' signal and a target trajectory. The system will consist mainly of the local activity signals used in the original lamprey locomotion model and the corresponding muscle tensions. The muscle tensions are used as a proprioception signal rather than relative position as they produce a similar signal without requiring the construction of a physical simulation of the lamprey. Two different approaches are considered: one using a direct negative feedback loop and another which attempts to learn a recurrent relation.
+
+Design Specification
+
+The system is largely similar to the original model. We assume a lamprey constructed of ten simplified vertebrae, each with two opposing muscles. Similarly, the target tension is defined by the equation:
+  [Equation] 
+where K is a scaling factor [equation] and parameters A, n, y, and L are equal to 1. The actual tension for each segment is defined as:
+  [Equation]
+where a_i is the segment activity. Segment activity and muscle tension are represented for points in the middle of each vertebrae over the length of the lamprey, z e [0, 0.1 ... 1], for time t >= 0. Segment activity is represented by a population of 400 neurons with a noise variance of 0.1, while the muscle tension is calculated directly.  
+
+Implementation
+
+  Basic Model
+
+  - Feedback
+    - simple feedback from tension, works immediately
+
+  - Learning
+    - compare weights
+    - shitty feedback signal
+    - NEF learning rule based on Hebbian learning, not suitable for recurrent connections
+
+  - Future Work
+    - relatively simple to correlate T with a, makes for a straightforward error signal

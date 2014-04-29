@@ -1,0 +1,126 @@
+%Packages
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[hmargin=1in,vmargin=1in]{geometry}
+\usepackage{cite}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+\usepackage[compact]{titlesec}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%       Formatting     %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setmainfont{Times New Roman}
+\doublespacing
+\setlength{\parindent}{1em}
+\setlength{\cftsecnumwidth}{25pt}
+\setlength{\parskip}{0.25em}
+\widowpenalty10000
+\clubpenalty10000
+
+\setlength\extrarowheight{3pt}
+
+\setlength{\belowdisplayskip}{0pt}
+\setlength{\abovedisplayskip}{0pt}
+\allowdisplaybreaks
+
+\titlespacing{\section}{0pt}{0pt}{0pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% TEMPLATE DEFINITIONS %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\dothis}[1]{\textcolor{red}{#1}}
+
+%Title template { Title } {Workplace } {Name/date }
+\newcommand{\waterlootitle}[3]{
+  \begin{singlespace}
+  \begin{titlepage}
+
+  \begin{center}
+
+  \textbf{\MakeUppercase{ University of Waterloo }} \\
+  \textbf{\MakeUppercase{Faculty of Engineering}}
+
+  \vfill
+
+  {
+    \LARGE
+    \textsc{\textbf{#1}}
+  }
+
+  \vfill
+
+  #2
+
+  \vfill
+
+  Prepared by: \\[1em]
+  #3
+
+  \end{center}
+
+  \end{titlepage}
+  \end{singlespace}
+}
+
+\newcommand{\dotableofcontents}
+{
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+}
+
+\newcommand{\e}[1]{\ensuremath{\times 10^{#1}}}
+
+\def\thesection{\arabic{section}.0 }
+\def\thesubsection{\arabic{section}.\arabic{subsection}}
+\renewcommand{\contentsname}{Table of Contents}
+\renewcommand{\cftsecleader}{\bfseries\cftdotfill{\cftdotsep}}
+\renewcommand{\cfttabpresnum}{Table }
+\renewcommand{\cfttabaftersnum}{.}
+\renewcommand{\cfttabnumwidth}{65pt}
+\renewcommand{\cftfigpresnum}{Figure }
+\renewcommand{\cftfigaftersnum}{.}
+\renewcommand{\cftfignumwidth}{65pt}
+\newcommand{\tocsection}[1]{ 
+\section*{#1}
+\addcontentsline{toc}{section}{#1}
+}
+\newenvironment{spaceditemize}{
+   \begin{list}{$\bullet$}
+    {
+      \setlength{\parskip}{0pt}
+    }}
+      {\end{list}\bigskip
+
+}
+
+\newenvironment{enumerate*}%
+  {\setlength{\parskip}{-0.25em}
+    \singlespacing
+   \begin{enumerate}%
+    \setlength{\itemsep}{0pt}}%
+  {\end{enumerate}}
+
+\newenvironment{waterlooletter}{
+\begin{singlespace}
+\setlength{\parindent}{0pt}}{
+\end{singlespace}
+\thispagestyle{empty}
+\newpage
+}
